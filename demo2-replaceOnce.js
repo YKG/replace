@@ -1,3 +1,5 @@
+let replacedFlag = false;
+
 function isInTagAttribute(text, index) {
     const lastIndexOfLeftArrow = text.lastIndexOf('<', index);
     const lastIndexOfRightArrow = text.lastIndexOf('>', index);
@@ -51,6 +53,7 @@ function replaceAt(text, find, replacement, index) {
     let flag2 = isInTagA(text, index);
     if (!flag && !flag2) {
         s = text.substring(0, index) + replacement + text.substring(index + replacement.length);
+        replacedFlag = true;
     }
     return s;
 }
@@ -58,7 +61,7 @@ function replaceAt(text, find, replacement, index) {
 function replace_alg2(text, find, replacement) {
     let fromIndex = 0;
     let i = -1;
-    while((i = text.indexOf(find, fromIndex)) !== -1) {
+    while((i = text.indexOf(find, fromIndex)) !== -1 && !replacedFlag) {
         // console.log(i, fromIndex);
         text = replaceAt(text, find, replacement, i);
         fromIndex = i + replacement.length;
