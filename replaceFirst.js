@@ -1,16 +1,16 @@
-function buildCheckFunction(pattern) {
-    return function (text, index) {
-        const start = text.lastIndexOf('<', index);
-        const end = text.indexOf('>', index);
-
-        return start !== -1 && end !== -1 && pattern.test(text.substring(start, end + 1));
-    }
-}
-
-const isInTagA = buildCheckFunction(/^<a(>|(\s[^<>]*)>)[^<>]*<\/a\s*>$/i);
-const isInTagAttribute = buildCheckFunction(/^<[^<>]+>$/);
-
 function replaceFirst(text, find, replacement) {
+    function buildCheckFunction(pattern) {
+        return function (text, index) {
+            const start = text.lastIndexOf('<', index);
+            const end = text.indexOf('>', index);
+
+            return start !== -1 && end !== -1 && pattern.test(text.substring(start, end + 1));
+        }
+    }
+
+    const isInTagA = buildCheckFunction(/^<a(>|(\s[^<>]*)>)[^<>]*<\/a\s*>$/i);
+    const isInTagAttribute = buildCheckFunction(/^<[^<>]+>$/);
+
     let fromIndex = 0;
     let i = -1;
     while((i = text.indexOf(find, fromIndex)) !== -1) {
