@@ -25,7 +25,7 @@ function getFirstTagAEnd(text, fromIndex) {
     let start = -1;
     while(fromIndex < text.length) {
         start = text.indexOf('</a', fromIndex);
-        start = start === -1 ? text.lastIndexOf('</A', fromIndex) : start;
+        start = start === -1 ? text.indexOf('</A', fromIndex) : start;
         if (start === -1) break;
 
         const str = text.slice(start, start + 4);
