@@ -1,129 +1,35 @@
-function isSpaceCharacter(ch) {
-    return ch === '\x20' || ch === '\x09' || ch === '\x0A' || ch === '\x0C' || ch === '\x0D';
+const CH = '~';
+
+function replaceFirst_str(a, b, c) {
+    return a.indexOf(CH);
 }
 
-function isTagAStart(text, i) {
-    const TAG_A_START = /^<a[>|\s]/i;
-    return TAG_A_START.test(text.substring(i));
-}
-
-function isTagAStart_opt(text, i) {
-    const j = i + 2;
-    if (j >= text.length) return false; // should never been called
-
-    const tag = text.substring(i, i + 3).toLowerCase();
-    return tag.charAt(1) === 'a' && (isSpaceCharacter(tag.charAt(2)) || tag.charAt(2) === '>');
-}
-
-
-function isTagAEnd(text, i) {
-    const TAG_A_END = /^<\a\s*>/i;
-    return TAG_A_END.test(text.substring(i));
-}
-
-function isTagAEnd_opt(text, i) {
-    const TAG_A_END = '</a>';
-    if (text.startsWith(TAG_A_END, i) || text.startsWith(TAG_A_END.toUpperCase(), i)) return true;
-
-    const TAG_A_END_WITHSPACE = '</a';
-    if (text.startsWith(TAG_A_END_WITHSPACE, i) || text.startsWith(TAG_A_END_WITHSPACE.toUpperCase(), i)) {
-        const j = i + TAG_A_END.length;
-        return j < text.length && isSpaceCharacter(text.charAt(j));
-    }
-    return false;
-}
-
-function findBorder(text, index) {
-    let ch;
-    for (let i = index; i < text.length; i++) {
-        ch = text.charAt(i);
-        if (ch === '<' || ch === '>') {
+function replaceFirst_opt(a, b, c) {
+    const len = a.length;
+    for (let i = 0; i < len; i++) {
+        if (a.charAt(i) === CH) {
             return i;
         }
     }
     return -1;
 }
 
-function findPrevBorder(text, index) {
-    let ch;
-    for (let i = index; i >= 0; i--) {
-        ch = text.charAt(i);
-        if (ch === '<' || ch === '>') {
-            return i;
-        }
-    }
-    return -1;
+function replaceFirst_re(a, b, c) {
+    return a.search(/~/);
 }
 
-function isInTagAttribute_opt(text, index) {
-    const right = findBorder(text, index);
-    if (right === -1 || text.charAt(right) === '<') return false;
-
-    const left = findPrevBorder(text, index);
-    return !(left === -1 || text.charAt(left) === '>');
+function replaceFirst_re2(a, b, c) {
+    return /~/.test(a);
 }
 
-function isInTagA_opt(text, index) {
-    const right = findBorder(text, index);
-    if (right === -1 || !isTagAEnd(text, right)) return false;
 
-    const left = findPrevBorder(text, index);
-    if (left === -1 || text.charAt(left) === '<') return false;
-
-    const lastIndexOfLT = text.lastIndexOf('<', left);
-    return lastIndexOfLT !== -1 && isTagAStart(text, lastIndexOfLT);
+function startsWith_re(a, b, c) {
+    return /^<html class="reX'/.test(a);
 }
 
-function isInTagAttribute(text, index) {
-    const lastIndexOfLT = text.lastIndexOf('<', index);
-    const lastIndexOfGT = text.lastIndexOf('>', index);
-    const nextIndexOfLT = text.indexOf('<', index);
-    const nextIndexOfGT = text.indexOf('>', index);
 
-    return !(lastIndexOfLT === -1 || nextIndexOfGT === -1 ||
-        lastIndexOfLT < lastIndexOfGT  || nextIndexOfLT < nextIndexOfGT);
-}
-
-function isInTagA(text, index) {
-    const lastIndexOfLT = text.lastIndexOf('<', index);
-    const lastIndexOfGT = text.lastIndexOf('>', index);
-    const nextIndexOfLT = text.indexOf('<', index);
-    const nextIndexOfGT = text.indexOf('>', index);
-
-    return 0 <= lastIndexOfLT &&
-        lastIndexOfLT < lastIndexOfGT &&
-        lastIndexOfGT < nextIndexOfLT &&
-        nextIndexOfLT < nextIndexOfGT &&
-        isTagAStart(text, lastIndexOfLT) &&
-        isTagAEnd(text, nextIndexOfLT);
-}
-
-function replaceFirst_str(text, find, replacement) {
-    let fromIndex = 0;
-    let i = -1;
-    while((i = text.indexOf(find, fromIndex)) !== -1) {
-        if (isInTagAttribute(text, i) || isInTagA(text, i)) {
-            fromIndex = i + find.length;
-        } else {
-            text = text.substring(0, i) + replacement + text.substring(i + find.length);
-            break; // fromIndex = i + replacement.length; // replaceAll
-        }
-    }
-    return text;
-}
-
-function replaceFirst_opt(text, find, replacement) {
-    let fromIndex = 0;
-    let i = -1;
-    while((i = text.indexOf(find, fromIndex)) !== -1) {
-        if (isInTagAttribute_opt(text, i) || isInTagA_opt(text, i)) {
-            fromIndex = i + find.length;
-        } else {
-            text = text.substring(0, i) + replacement + text.substring(i + find.length);
-            break; // fromIndex = i + replacement.length; // replaceAll
-        }
-    }
-    return text;
+function startsWith(a, b, c) {
+    return a.startsWith('<html class="reX');
 }
 
 
@@ -138,19 +44,26 @@ function mytest(text, alg) {
     const n = 20;
     for (let t = 0; t < n; t++) {
         let t1 = performance.now();
-        for (let i = 0; i < 1; i++) {
+        for (let i = 0; i < 10000; i++) {
             alg(text, find, replacement);
         }
         let t2 = performance.now();
         sum += t2 - t1;
         console.log(alg.name, t2 - t1);
     }
-    console.log('avg', sum/n);
+    console.log('avg', sum/n, '\n');
+}
+
+function run2(text) {
+    mytest(text, startsWith);
+    mytest(text, startsWith_re);
 }
 
 function run(text) {
+    mytest(text, replaceFirst_re2);
     mytest(text, replaceFirst_str);
-    mytest(text, replaceFirst_opt);
+    // mytest(text, replaceFirst_opt);
+    mytest(text, replaceFirst_re);
 }
 
 // let s = '票房票房html<a>票房</a>票房AA\x01BB<a>wng票房e1kk</a> 票房票房loong票房票房 <a href="票房" alter="nXnwgX9">X票房票房X</a>end票房wng213<p e>票房</p><ax票房>票房</ax><img src="票房"/><a >票房</a>票房票房';
@@ -320,5 +233,5 @@ const s = '<html class="responsive" style="font-size: 100px;"><script async="" s
     '\n' +
     '\n' +
     '</body></html>';
-run(s);
-
+// run(s);
+run2(s);
