@@ -14,7 +14,7 @@ function getLastTagAStart(text, fromIndex) {
 
     let start;
     while(fromIndex >= 0 && ((start = lastIndexOfIgnoreCase(text, PREFIX, fromIndex)) !== -1)) {
-        const str = text.slice(start, start + 3);
+        const str = text.slice(start, start + PREFIX.length + 1);
         if (re.test(str)) return start;
         fromIndex = start - 1;
     }
@@ -28,9 +28,9 @@ function getFirstTagAEnd(text, fromIndex) {
 
     let start;
     while(fromIndex < text.length && ((start = indexOfIgnoreCase(text, PREFIX, fromIndex)) !== -1)) {
-        const str = text.slice(start, start + 4);
+        const str = text.slice(start, start + PREFIX.length + 1);
         if (re.test(str)) return start;
-        fromIndex = start + 3;
+        fromIndex = start + PREFIX.length;
     }
 
     return -1;
