@@ -92,3 +92,4 @@ run('<a href="#"> <div class="票房">票房</div> </a> 票房');
 run('<a href="#">x</a><span>票房</span> <a>y</a>');
 run('<a href="#"> <audio>票房</audio> </a> 票房');
 run('<a href="#"> <article>票房</article> <audio>票房</audio> </a> 票房');
+run('<a\t>票房</a\t> 票房');
